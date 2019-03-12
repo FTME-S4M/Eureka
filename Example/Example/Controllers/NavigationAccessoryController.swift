@@ -8,9 +8,43 @@
 
 import Eureka
 
+class MyNavigationAccessoryView : NavigationAccessoryView {
+    
+    lazy var doneNextButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "Next", style: .done, target: self, action: #selector(didTapCustomNextDone))
+        return button
+    }()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        autoresizingMask = .flexibleWidth
+        setItems([doneNextButton], animated: false)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    @objc private func didTapCustomNextDone() {
+        nextEnabled ? nextClosure?() : doneClosure?()
+        doneNextButton.title = nextEnabled ? "Next" : "Done"
+    }
+}
+
 class NavigationAccessoryController : FormViewController {
 
     var navigationOptionsBackup : RowNavigationOptions?
+    
+    override var customNavigationAccessoryView: (UIView & NavigationAccessory)? {
+        return MyNavigationAccessoryView()
+    }
+    
+    override func inputAccessoryView(for row: BaseRow) -> UIView? {
+        guard let myView = super.inputAccessoryView(for: row) as? MyNavigationAccessoryView else { return nil }
+        myView.doneNextButton.title = myView.nextEnabled ? "Next" : "Done"
+        return myView
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,49 +54,49 @@ class NavigationAccessoryController : FormViewController {
 
         form = Section(header: "Settings", footer: "These settings change how the navigation accessory view behaves")
 
-            <<< SwitchRow("set_none") { [weak self] in
-                $0.title = "Navigation accessory view"
-                $0.value = self?.navigationOptions != .Disabled
-                }.onChange { [weak self] in
-                    if $0.value ?? false {
-                        self?.navigationOptions = self?.navigationOptionsBackup
-                        self?.form.rowBy(tag: "set_disabled")?.baseValue = self?.navigationOptions?.contains(.StopDisabledRow)
-                        self?.form.rowBy(tag: "set_skip")?.baseValue = self?.navigationOptions?.contains(.SkipCanNotBecomeFirstResponderRow)
-                        self?.form.rowBy(tag: "set_disabled")?.updateCell()
-                        self?.form.rowBy(tag: "set_skip")?.updateCell()
-                    }
-                    else {
-                        self?.navigationOptionsBackup = self?.navigationOptions
-                        self?.navigationOptions = .Disabled
-                    }
-            }
-
-            <<< CheckRow("set_disabled") { [weak self] in
-                $0.title = "Stop at disabled row"
-                $0.value = self?.navigationOptions?.contains(.StopDisabledRow)
-                $0.hidden = "$set_none == false" // .Predicate(NSPredicate(format: "$set_none == false"))
-                }.onChange { [weak self] row in
-                    if row.value ?? false {
-                        self?.navigationOptions = self?.navigationOptions?.union(.StopDisabledRow)
-                    }
-                    else{
-                        self?.navigationOptions = self?.navigationOptions?.subtracting(.StopDisabledRow)
-                    }
-            }
-
-            <<< CheckRow("set_skip") { [weak self] in
-                $0.title = "Skip non first responder view"
-                $0.value = self?.navigationOptions?.contains(.SkipCanNotBecomeFirstResponderRow)
-                $0.hidden = "$set_none  == false"
-                }.onChange { [weak self] row in
-                    if row.value ?? false {
-                        self?.navigationOptions = self?.navigationOptions?.union(.SkipCanNotBecomeFirstResponderRow)
-                    }
-                    else{
-                        self?.navigationOptions = self?.navigationOptions?.subtracting(.SkipCanNotBecomeFirstResponderRow)
-                    }
-            }
-
+//            <<< SwitchRow("set_none") { [weak self] in
+//                $0.title = "Navigation accessory view"
+//                $0.value = self?.navigationOptions != .Disabled
+//                }.onChange { [weak self] in
+//                    if $0.value ?? false {
+//                        self?.navigationOptions = self?.navigationOptionsBackup
+//                        self?.form.rowBy(tag: "set_disabled")?.baseValue = self?.navigationOptions?.contains(.StopDisabledRow)
+//                        self?.form.rowBy(tag: "set_skip")?.baseValue = self?.navigationOptions?.contains(.SkipCanNotBecomeFirstResponderRow)
+//                        self?.form.rowBy(tag: "set_disabled")?.updateCell()
+//                        self?.form.rowBy(tag: "set_skip")?.updateCell()
+//                    }
+//                    else {
+//                        self?.navigationOptionsBackup = self?.navigationOptions
+//                        self?.navigationOptions = .Disabled
+//                    }
+//            }
+//
+//            <<< CheckRow("set_disabled") { [weak self] in
+//                $0.title = "Stop at disabled row"
+//                $0.value = self?.navigationOptions?.contains(.StopDisabledRow)
+//                $0.hidden = "$set_none == false" // .Predicate(NSPredicate(format: "$set_none == false"))
+//                }.onChange { [weak self] row in
+//                    if row.value ?? false {
+//                        self?.navigationOptions = self?.navigationOptions?.union(.StopDisabledRow)
+//                    }
+//                    else{
+//                        self?.navigationOptions = self?.navigationOptions?.subtracting(.StopDisabledRow)
+//                    }
+//            }
+//
+//            <<< CheckRow("set_skip") { [weak self] in
+//                $0.title = "Skip non first responder view"
+//                $0.value = self?.navigationOptions?.contains(.SkipCanNotBecomeFirstResponderRow)
+//                $0.hidden = "$set_none  == false"
+//                }.onChange { [weak self] row in
+//                    if row.value ?? false {
+//                        self?.navigationOptions = self?.navigationOptions?.union(.SkipCanNotBecomeFirstResponderRow)
+//                    }
+//                    else{
+//                        self?.navigationOptions = self?.navigationOptions?.subtracting(.SkipCanNotBecomeFirstResponderRow)
+//                    }
+//            }
+//
 
             +++
 
