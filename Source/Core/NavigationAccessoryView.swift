@@ -97,7 +97,7 @@ open class NavigationAccessoryView: UIToolbar, NavigationAccessory {
             return previousButton.isEnabled
         }
         set {
-            previousButton.isEnabled = previousEnabled
+            previousButton.isEnabled = newValue
         }
     }
 
@@ -106,7 +106,7 @@ open class NavigationAccessoryView: UIToolbar, NavigationAccessory {
             return nextButton.isEnabled
         }
         set {
-            nextButton.isEnabled = nextEnabled
+            nextButton.isEnabled = newValue
         }
     }
 }
