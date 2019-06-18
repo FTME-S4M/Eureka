@@ -25,9 +25,12 @@
 import Foundation
 
 public struct RuleRequired<T: Equatable>: RuleType {
-
-    public init(msg: String = "Field required!", id: String? = nil) {
+    
+    var shouldValidateWhiteSpaces: Bool = true
+    
+    public init(msg: String = "Field required!", id: String? = nil, shouldValidateWhiteSpaces: Bool = true) {
         self.validationError = ValidationError(msg: msg)
+        self.shouldValidateWhiteSpaces = shouldValidateWhiteSpaces
         self.id = id
     }
 
@@ -36,7 +39,8 @@ public struct RuleRequired<T: Equatable>: RuleType {
 
     public func isValid(value: T?) -> ValidationError? {
         if let str = value as? String {
-            return str.isEmpty ? validationError : nil
+            let stringTobeValidated = shouldValidateWhiteSpaces ? str.trimmingCharacters(in: .whitespacesAndNewlines) : str
+            return stringTobeValidated.isEmpty ? validationError : nil
         }
         return value != nil ? nil : validationError
     }
